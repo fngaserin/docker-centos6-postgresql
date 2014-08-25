@@ -8,18 +8,8 @@ RUN yum install -y postgresql93-server pgtune
 
 EXPOSE 5432
 
-ENV PGDATA /var/lib/pgsql/9.3/data
-USER postgres
+ADD postgres-launch.sh /postgres-launch.sh
+RUN chmod 755 /postgres-launch.sh
 
-RUN /usr/pgsql-9.3/bin/initdb --locale=en_US.UTF-8
-RUN pgtune -T Web -i $PGDATA/postgresql.conf > $PGDATA/local.conf
-RUN echo "listen_addresses='*'" >> $PGDATA/local.conf
-RUN echo "include = 'local.conf'" >> $PGDATA/postgresql.conf
-RUN echo "local all all trust" > $PGDATA/pg_hba.conf
-RUN echo "host all all 127.0.0.1/32 trust" >> $PGDATA/pg_hba.conf
-RUN echo "host all all 0.0.0.0/0 trust" >> $PGDATA/pg_hba.conf
-RUN echo "fsync=off" >> $PGDATA/local.conf
 
-USER root
-
-CMD su - postgres -c '/usr/pgsql-9.3/bin/postgres -D $PGDATA'
+CMD ["/bin/bash","-c","/postgres-launch.sh"]
